@@ -44,6 +44,7 @@ void Table::print() const {
 }
 }
 
+
 void Table::update(const std::string& columnName, int index, const std::string& newVal){
     for(auto& col: columns){
         if(col.getName()==columnName){

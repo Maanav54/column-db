@@ -23,15 +23,18 @@ int main() {
     studentTable.insertRow({"2", "Bob", "22"});
     studentTable.insertRow({"3", "Charlie", "21"});
 
-    studentTable.print();
+    //studentTable.print();
 
-    studentTable.update("Name", 1, "Zoya");    
+    studentTable.update("Name", 1, "zoya");    
     studentTable.update("Age", 2, "26");    
 
-    std::cout << "\nAfter Update:\n";
-    studentTable.print();
-
-    qp.executeQuery("SELECT * FROM StudentTable");
+    // std::cout << "\nAfter Update:\n";
+    // studentTable.print();
+    qp.addTable("StudentTable", studentTable);
+    //qp.executeQuery("SELECT * FROM StudentTable");
+    qp.executeQuery("SELECT * FROM StudentTable WHERE Age > 20");
+    qp.executeQuery("SELECT Name, Age FROM StudentTable");
+    qp.executeQuery("SELECT Age FROM StudentTable WHERE Name = zoya");
     return 0;
 }
 

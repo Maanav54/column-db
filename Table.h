@@ -12,6 +12,9 @@ public:
     void insertRow(const std::vector<std::string>& rowData);  // insert a full row
     void print() const;  
     std::vector<int> search(const std::string& columnName, const std::string& value) const;
-                            
+    const std::vector<Column>& getColumns() const
+    {
+        return columns;
+    }                        
 };
 
