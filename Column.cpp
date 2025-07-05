@@ -29,14 +29,13 @@ void Column::getValueAt(int index){
 
 
 void Column::deleteAt(int index){
-    if(index<0||index>data.size()){
+    if(index < 0 || index >= data.size()){
         std::cout<<"Index out of bounds!"<<'\n';
         return;
     }
-    data.erase(data.begin() + (index-1));
-    std::cout << "Deleted value at index"<<'\n';
+    data.erase(data.begin() + index);
+    std::cout << "Deleted value at index " << index << '\n';
 }
-
 
 int Column::size() const{
     std::cout<<"Size of column "<<name<<": "<<data.size()<<'\n';

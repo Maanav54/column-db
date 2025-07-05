@@ -11,9 +11,9 @@ private:
 
     // Helper functions for query processing
     std::vector<std::string> parseQuery(const std::string &query);
-    std::vector<std::string> getSelectedColumns(const std::vector<std::string> &tokens);
-    void printSelectedColumns(const Table &table, const std::vector<std::string> &columns);
-    void handleWhereClause(const Table &table, const std::vector<std::string> &tokens);
+    std::vector<std::string> getSelectedColumns(const std::vector<std::string> &tokens, Table &table);
+    void printSelectedColumns(Table &table, const std::vector<std::string> &columns);
+    void handleWhereClause(Table &table, const std::vector<std::string> &whereTokens, const std::vector<std::string> &selectedColumns,bool isDelete = false);
 
 public:
     QueryProcessor();

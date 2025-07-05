@@ -2,39 +2,43 @@
 #include "Column.h"
 #include "Table.h"
 #include "QueryProcessor.h"
+#include "utils/FileHandler.h"
 using namespace std;
 QueryProcessor qp;
 
-int main() {
+int main()
+{
     cout << "Column-Store DB Started!!" << '\n';
-    Column agecol("Age");
-    
-    agecol.insert("25");
-    agecol.insert("30");
-    agecol.insert("35");
-    agecol.insert("40");
 
-    agecol.print();
-    agecol.size();
+    // Load or create a default table for demonstration
+    Table t({"ID", "Name", "Age"});
+    t.insertRow({"1", "Alice", "20"});
+    t.insertRow({"2", "Bob", "22"});
+    FileHandler::saveTable(t, "StudentTable");
+    Table loaded = FileHandler::loadTable("StudentTable");
+    qp.addTable("StudentTable", loaded);
 
-    Table studentTable({"ID", "Name", "Age"});
-
-    studentTable.insertRow({"1", "Alice", "20"});
-    studentTable.insertRow({"2", "Bob", "22"});
-    studentTable.insertRow({"3", "Charlie", "21"});
-
-    //studentTable.print();
-
-    studentTable.update("Name", 1, "zoya");    
-    studentTable.update("Age", 2, "26");    
-
-    // std::cout << "\nAfter Update:\n";
-    // studentTable.print();
-    qp.addTable("StudentTable", studentTable);
-    //qp.executeQuery("SELECT * FROM StudentTable");
-    qp.executeQuery("SELECT * FROM StudentTable WHERE Age > 20");
-    qp.executeQuery("SELECT Name, Age FROM StudentTable");
-    qp.executeQuery("SELECT Age FROM StudentTable WHERE Name = zoya");
+    cout << "Type SQL-like queries (e.g., SELECT * FROM StudentTable), or type EXIT to quit.\n";
+    string input;
+    while (true)
+    {
+        cout << "\n> ";
+        getline(cin, input);
+        if (input == "EXIT" || input == "exit" || input == "quit" || input == "QUIT")
+        {
+            cout << "Exiting Column-Store DB.\n";
+            break;
+        }
+        if (input == "HELP" || input == "help")
+        {
+            cout << "Supported commands:\n";
+            cout << "  SELECT ...\n  INSERT ...\n  UPDATE ...\n  DELETE ...\n";
+            cout << "Type EXIT to quit.\n";
+            continue;
+        }
+        if (input.empty())
+            continue;
+        qp.executeQuery(input);
+    }
     return 0;
 }
-
