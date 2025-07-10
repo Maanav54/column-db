@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iomanip> // For std::setw and std::left
+#include "utils/FileHandler.h"
 
 QueryProcessor::QueryProcessor()
 {
@@ -134,6 +135,48 @@ void QueryProcessor::executeQuery(const std::string &query)
         return;
     }
 
+    // --- CREATE TABLE ---
+    if (tokens[0] == "CREATE" && tokens.size() >= 4 && tokens[1] == "TABLE")
+    {
+        std::string tableName = tokens[2];
+        std::string colsStr;
+        // Join the rest of the tokens for column list
+        for (size_t i = 3; i < tokens.size(); ++i)
+        {
+            if (!colsStr.empty())
+                colsStr += " ";
+            colsStr += tokens[i];
+        }
+        // Remove parentheses if present
+        if (!colsStr.empty() && colsStr.front() == '(' && colsStr.back() == ')')
+            colsStr = colsStr.substr(1, colsStr.size() - 2);
+
+        // Split by comma and trim spaces
+        std::vector<std::string> colNames;
+        std::istringstream ss(colsStr);
+        std::string col;
+        while (std::getline(ss, col, ','))
+        {
+            size_t start = col.find_first_not_of(" \t");
+            size_t end = col.find_last_not_of(" \t");
+            if (start != std::string::npos && end != std::string::npos)
+                colNames.push_back(col.substr(start, end - start + 1));
+        }
+        if (colNames.empty())
+        {
+            std::cout << "Error: No columns specified\n";
+            return;
+        }
+        Table t(colNames);
+        addTable(tableName, t);
+        FileHandler::saveTable(t, tableName);
+        std::cout << "Table '" << tableName << "' created with columns: ";
+        for (const auto &name : colNames)
+            std::cout << name << " ";
+        std::cout << "\n";
+        return;
+    }
+
     // Handle INSERT queries
     if (tokens[0] == "INSERT")
     {
@@ -194,6 +237,7 @@ void QueryProcessor::executeQuery(const std::string &query)
             return;
         }
         tableIt->second.insertRow(values);
+        FileHandler::saveTable(tableIt->second, tableName);
         std::cout << "Row inserted into '" << tableName << "'\n";
         return;
     }
@@ -240,17 +284,19 @@ void QueryProcessor::executeQuery(const std::string &query)
                 }
             }
             std::cout << "All rows deleted from table '" << tableName << "'\n";
+            FileHandler::saveTable(tableIt->second, tableName);
             return;
         }
     }
-    if(tokens[0]=="UPDATE"){
-        if(tokens[2]!="SET" || tokens.size() < 5)
+    if (tokens[0] == "UPDATE")
+    {
+        if (tokens[2] != "SET" || tokens.size() < 5)
         {
             std::cout << "Error: Invalid UPDATE query format\n";
             return;
         }
-        auto setIt = std::find(tokens.begin(),tokens.end(),"SET");
-        if(setIt == tokens.end() || (setIt + 1) == tokens.end())
+        auto setIt = std::find(tokens.begin(), tokens.end(), "SET");
+        if (setIt == tokens.end() || (setIt + 1) == tokens.end())
         {
             std::cout << "Error: Missing SET clause\n";
             return;
@@ -315,6 +361,7 @@ void QueryProcessor::executeQuery(const std::string &query)
                 }
             }
         }
+        FileHandler::saveTable(tableIt->second, tableName);
         return;
     }
     if (tokens.size() < 4)
@@ -439,7 +486,7 @@ void QueryProcessor::handleWhereClause(Table &table, const std::vector<std::stri
         {
             for (auto &col : table.getColumns())
             {
-                    col.deleteAt(static_cast<int>(rowIndex));
+                col.deleteAt(static_cast<int>(rowIndex));
             }
         }
         std::cout << "Rows deleted successfully.\n";
